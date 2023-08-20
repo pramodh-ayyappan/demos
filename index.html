@@ -1,40 +1,287 @@
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<title>reveal.js</title>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<link rel="stylesheet" href="dist/reset.css">
-		<link rel="stylesheet" href="dist/reveal.css">
-		<link rel="stylesheet" href="dist/theme/black.css">
+	<title>reveal.js</title>
 
-		<!-- Theme used for syntax highlighted code -->
-		<link rel="stylesheet" href="plugin/highlight/monokai.css">
-	</head>
-	<body>
-		<div class="reveal">
-			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2</section>
-			</div>
+	<link rel="stylesheet" href="dist/reset.css">
+	<link rel="stylesheet" href="dist/reveal.css">
+	<link rel="stylesheet" href="dist/theme/black.css">
+
+	<!-- Theme used for syntax highlighted code -->
+	<link rel="stylesheet" href="plugin/highlight/monokai.css">
+	<link rel="stylesheet" type="text/css" href="node_modules/asciinema-player/dist/bundle/asciinema-player.css" />
+</head>
+
+<body>
+	<div class="reveal">
+		<div class="slides">
+			<section>
+				<h1 style="color: springgreen;">Demo Day</h1>
+				<h3 style="color: chocolate;">Sprint 36</h3>
+				<h3 style="color: chocolate;">21 Aug 2023</h3>
+			</section>
+			<section>
+				<h3 style="color: springgreen; text-transform: capitalize;">Tasks</h3>
+				<img class="r-stretch" src="assets/tasks.png">
+			</section>
+			<section>
+				<h3 style="color: springgreen; text-transform: capitalize;">Wireguard Operator as Config Module</h3>
+				<section>
+					<pre>
+								<p>module.json</p>
+								<code data-trim data-noescape data-line-numbers="1,2,3,5,6,8,11" style="overflow: hidden;">
+									{
+										"provides": "wireguard_operator",
+										"supported_clouds": ["aws", "gcp", "azure"],
+										"inputs": {},
+										"lifecycle": "ENVIRONMENT",
+										"version": "0.1",
+										"depends_on": [],
+										"input_type": "config",
+										"composition": {},
+										"conditional_on_intent": ""
+									}											
+								</code>
+							</pre>
+				</section>
+				<section>
+					<pre>
+						<p>sample.json</p>
+						<code data-trim data-noescape data-line-numbers="2|4|6|11-14|15-24" style="overflow: hidden;">
+							{
+								"kind": "wireguard_operator",
+								"flavor": "default",
+								"version": "0.1",
+								"lifecycle": "ENVIRONMENT",
+								"disabled": false,
+								"depends_on": [],
+								"metadata": {
+									"name": ""
+								},
+								"spec": {
+									"cpu": "100m",
+									"memory": "300Mi"
+								},
+								"advanced": {
+									"wireguard_operator": {
+										// helm chart attributes here
+										"version": "0.1.0",
+										"wait": true,
+										"values": {
+											// helm chart values here
+										}
+									}
+								},
+								"out": {}
+							}
+						</code>
+					</pre>
+				</section>
+			</section>
+			<section>
+				<h3 style="color: springgreen; text-transform: capitalize;">Wireguard Operator - Terraform Test</h3>
+				<div id="wireguard-operator-tf-demo"></div>
+				<script src="node_modules/asciinema-player/dist/bundle/asciinema-player.min.js"></script>
+				<script>
+					AsciinemaPlayer.create(
+						'assets/task1/wireguard-operator-tf-demo.cast',
+						document.getElementById('wireguard-operator-tf-demo'),
+						{
+							cols: 205,
+							rows: 40,
+							poster: 'npt:01:30'
+						}
+					);
+				</script>
+			</section>
+			<section>
+				<h3 style="color: springgreen; text-transform: capitalize;">Wireguard Operator - TerraTest</h3>
+				<div id="wireguard-operator-terratest-demo"></div>
+				<script src="node_modules/asciinema-player/dist/bundle/asciinema-player.min.js"></script>
+				<script>
+					AsciinemaPlayer.create(
+						'assets/task1/wireguard-operator-terratest-demo.cast',
+						document.getElementById('wireguard-operator-terratest-demo'),
+						{
+							cols: 205,
+							rows: 40,
+							poster: 'npt:01:03'
+						},
+					);
+				</script>
+			</section>
+			<section>
+				<h3 style="color: springgreen; text-transform: capitalize;">Wireguard Operator - Test in Facets CP</h3>
+				<div class="r-stack">
+					<img class="fragment fade-out" src="assets/task1/1.png">
+					<img class="fragment current-visible" src="assets/task1/2.png">
+					<img class="fragment current-visible" src="assets/task1/3.png">
+					<img class="fragment current-visible" src="assets/task1/4.png">
+					<img class="fragment current-visible" src="assets/task1/5.png">
+					<img class="fragment current-visible" src="assets/task1/6.png">
+					<img class="fragment current-visible" src="assets/task1/7.png">
+					<img class="fragment" src="assets/task1/8.png">
+				</div>
+			</section>
+			<section>
+				<h3 style="color: springgreen; text-transform: capitalize;">Loki - Log based alerting</h3>
+				<section>
+					<pre>
+								<p>module.json</p>
+								<code data-trim data-noescape data-line-numbers="2,3,7,9" style="overflow: hidden;">
+									{
+										"provides": "alert_group",
+										"flavors": ["loki"],
+										"supported_clouds": ["any"],
+										"inputs": {},
+										"lifecycle": "ENVIRONMENT",
+										"version": "0.1",
+										"depends_on": [],
+										"input_type": "instance",
+										"composition": {},
+										"conditional_on_intent": ""
+									}																	
+								</code>
+							</pre>
+				</section>
+				<section>
+					<pre>
+						<p>sample.json</p>
+						<code data-trim data-noescape data-line-numbers="2|3|6|12-13|14-26|27-39">
+							{
+								"kind": "alert_group",
+								"flavor": "loki",
+								"version": "0.1",
+								"lifecycle": "ENVIRONMENT",
+								"disabled": false,
+								"provided": false,
+								"depends_on": [],
+								"metadata": {
+									"name": ""
+								},
+								"spec": {
+									"rules": {
+										"HighPercentageError": {
+											"expr": "sum(rate({app=\"foo\", env=\"production\"} |= \"error\" [5m])) by (job) / sum(rate({app=\"foo\", env=\"production\"}[5m])) by (job) > 0.05",
+											"message": "High request latency",
+											"summary": "High request latency for {{ $labels.app }}",
+											"for": "2m",
+											"labels": {
+												"team": "infra",
+												"severity": "critical"
+											},
+											"disabled": false,
+											"resource_name": "{{ $labels.app}}",
+											"resource_type": "app"
+										},
+										"TestAlert": {
+											"expr": "sum(rate({app=\"loki\"} | logfmt | level=\"info\"[1m])) by (container) > 0",
+											"for": "1m",
+											"labels": {
+												"team": "infra",
+												"severity": "warning"
+											},
+											"summary": "Loki info warning per minute rate > 0",
+											"message": "Loki warning per minute rate > 0 container: {{ $labels.container }}",
+											"resource_name": "{{ $labels.app}}",
+											"resource_type": "app",
+											"disabled": false
+										}
+									}
+								},
+								"advanced": {},
+								"out": {}
+							}
+						</code>
+					</pre>
+				</section>
+			</section>
+			<section>
+				<h3 style="color: springgreen; text-transform: capitalize;">Loki - Log based alerting - Terraform Test</h3>
+				<div id="loki-log-alert-tf-demo"></div>
+				<script src="node_modules/asciinema-player/dist/bundle/asciinema-player.min.js"></script>
+				<script>
+					AsciinemaPlayer.create(
+						'assets/task2/terraform_test.cast',
+						document.getElementById('loki-log-alert-tf-demo'),
+						{
+							cols: 205,
+							rows: 40,
+							poster: 'npt:01:30'
+						}
+					);
+				</script>
+			</section>
+			<section>
+				<h3 style="color: springgreen; text-transform: capitalize;">Loki - Log based alerting - TerraTest</h3>
+				<div id="loki-log-alert-terratest-demo"></div>
+				<script src="node_modules/asciinema-player/dist/bundle/asciinema-player.min.js"></script>
+				<script>
+					AsciinemaPlayer.create(
+						'assets/task2/terratest_test.cast',
+						document.getElementById('loki-log-alert-terratest-demo'),
+						{
+							cols: 205,
+							rows: 40,
+							poster: 'npt:01:03'
+						},
+					);
+				</script>
+			</section>
+			<section>
+				<h3 style="color: springgreen; text-transform: capitalize;">Loki - Log based alerting - Test in Facets CP</h3>
+				<div class="r-stack">
+					<img class="fragment fade-out" src="assets/task2/rc_enabled_loki_alerts.png">
+					<img class="fragment current-visible" src="assets/task2/rc_alert_group_loki1.png">
+					<img class="fragment current-visible" src="assets/task2/rc_alert_group_loki2.png">
+					<img class="fragment current-visible" src="assets/task2/rc_loki01_intent.png">
+					<img class="fragment current-visible" src="assets/task2/apply_release_tf_plan.png">
+					<img class="fragment current-visible" src="assets/task2/apply_release_tf_cm_apply.png">
+					<img class="fragment current-visible" src="assets/task2/apply_release_tf_loki_apply.png">
+				</div>
+			</section>
+			<section>
+				<h3 style="color: springgreen; text-transform: capitalize;">Loki - Log based alerting - Checking If Rules Created</h3>
+				<div id="loki-log-alert-rules-demo"></div>
+				<script src="node_modules/asciinema-player/dist/bundle/asciinema-player.min.js"></script>
+				<script>
+					AsciinemaPlayer.create(
+						'assets/task2/verifying-cm-mounted.cast',
+						document.getElementById('loki-log-alert-rules-demo'),
+						{
+							cols: 205,
+							rows: 40,
+							poster: 'npt:01:03'
+						},
+					);
+				</script>
+			</section>
+			<section data-background-color="aquamarine">
+				<h4 >🥷🏿Thanks!!</h4>
+				<h4 >Any Questions?</h4>
+			</section>
 		</div>
+	</div>
 
-		<script src="dist/reveal.js"></script>
-		<script src="plugin/notes/notes.js"></script>
-		<script src="plugin/markdown/markdown.js"></script>
-		<script src="plugin/highlight/highlight.js"></script>
-		<script>
-			// More info about initialization & config:
-			// - https://revealjs.com/initialization/
-			// - https://revealjs.com/config/
-			Reveal.initialize({
-				hash: true,
+	<script src="dist/reveal.js"></script>
+	<script src="plugin/notes/notes.js"></script>
+	<script src="plugin/markdown/markdown.js"></script>
+	<script src="plugin/highlight/highlight.js"></script>
+	<script>
+		// More info about initialization & config:
+		// - https://revealjs.com/initialization/
+		// - https://revealjs.com/config/
+		Reveal.initialize({
+			hash: true,
 
-				// Learn about plugins: https://revealjs.com/plugins/
-				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
-			});
-		</script>
-	</body>
+			// Learn about plugins: https://revealjs.com/plugins/
+			plugins: [RevealMarkdown, RevealHighlight, RevealNotes]
+		});
+	</script>
+</body>
+
 </html>
