@@ -50,7 +50,7 @@
 				</section>
 				<section>
 					<pre>
-						<p>sample.json</p>
+						<p>configuration/instances/sample.json</p>
 						<code data-trim data-noescape data-line-numbers="2|4|6|11-14|15-24" style="overflow: hidden;">
 							{
 								"kind": "wireguard_operator",
@@ -78,6 +78,28 @@
 								},
 								"out": {}
 							}
+						</code>
+					</pre>
+				</section>
+				<section>
+					<pre>
+						<p><b>To Create VPN Server</b></p>
+						<p>test-vpn.yaml</p>
+						<code data-trim data-noescape style="overflow: hidden;">
+							apiVersion: vpn.example.com/v1alpha1
+							kind: Wireguard
+							metadata:
+								name: "facets-vpn"
+						</code>
+						<p><b>To Create User</b></p>
+						<p>test-user.yaml</p>
+						<code data-trim data-noescape style="overflow: hidden;">
+							apiVersion: vpn.example.com/v1alpha1
+							kind: WireguardPeer
+							metadata:
+								name: test-user
+							spec:
+								wireguardRef: "facets-vpn"
 						</code>
 					</pre>
 				</section>
@@ -131,6 +153,64 @@
 				<h3 style="color: springgreen; text-transform: capitalize;">Loki - Log based alerting</h3>
 				<section>
 					<pre>
+						<p><b>The Problem?</b></p>
+						<p>loki-log-alert.yaml</p>
+						<code data-trim data-noescape>
+						groups:
+							- name: Test
+								rules:
+								- alert: ExceptionWhileVerifyingOTP
+									expr: sum(rate({app=~\".+\", app!~\".*loki.*\"} |= \"Exception caught while verifying OTP\" [1m])) by (job) > 0
+									for: 5m
+									labels:
+										severity: critical
+									annotations:
+										summary: Exception caught while verifying OTP from Service `{{ $labels.app }}`
+										description: Exception caught while verifying OTP from Service `{{ $labels.app }}`
+								- alert: DeadlineExceeded
+									expr: sum(rate({app=~\".+\", app!~\".*loki.*\"} |= \"DEADLINE_EXCEEDED\" [1m])) by (job) > 0
+									for: 5m
+									labels:
+										severity: critical
+									annotations:
+										summary: DEADLINE_EXCEEDED error from Service `{{ $labels.app }}`
+										description: DEADLINE_EXCEEDED error from Service `{{ $labels.app }}`
+					</code>
+				</pre>
+			</section>
+				<section>
+					<pre>
+						<p><b>The Problem?</b></p>
+						<p>log_collector/instances/loki.json</p>
+						<code data-trim data-noescape data-line-numbers="7">
+							"ruler": {
+								"enabled": true,
+								"kind": "Deployment",
+								"replicas": 1,
+								"directories": {
+									"tenant_mplpro": {
+										"rules.txt": "groups:\n  - name: Test\n    rules:\n    - alert: ExceptionWhileVerifyingOTP\n      expr: sum(rate({app=~\".+\", app!~\".*loki.*\"} |= \"Exception caught while verifying OTP\" [1m])) by (job) > 0\n      for: 5m\n      labels:\n        severity: critical\n      annotations:\n        summary: Exception caught while verifying OTP from Service `{{ $labels.app }}`\n        description: Exception caught while verifying OTP from Service `{{ $labels.app }}`\n    - alert: DeadlineExceeded\n      expr: sum(rate({app=~\".+\", app!~\".*loki.*\"} |= \"DEADLINE_EXCEEDED\" [1m])) by (job) > 0\n      for: 5m\n      labels:\n        severity: critical\n      annotations:\n        summary: DEADLINE_EXCEEDED error from Service `{{ $labels.app }}`\n        description: DEADLINE_EXCEEDED error from Service `{{ $labels.app }}`"
+									}
+								},
+								"extraEnv": [
+									{
+										"name": "MY_POD_IP",
+										"valueFrom": {
+											"fieldRef": {
+												"fieldPath": "status.podIP"
+											}
+										}
+									}
+								],
+								"extraArgs": [
+									"-memberlist.bind-addr=$(MY_POD_IP)"
+								]
+							}
+						</code>
+					</pre>
+				</section>
+				<section>
+					<pre>
 								<p>module.json</p>
 								<code data-trim data-noescape data-line-numbers="2,3,7,9" style="overflow: hidden;">
 									{
@@ -150,8 +230,8 @@
 				</section>
 				<section>
 					<pre>
-						<p>sample.json</p>
-						<code data-trim data-noescape data-line-numbers="2|3|6|12-13|14-26|27-39">
+						<p>alert_group/instances/sample.json</p>
+						<code data-trim data-noescape data-line-numbers="2|3|4|6|12-13|14-26|27-39">
 							{
 								"kind": "alert_group",
 								"flavor": "loki",
@@ -211,7 +291,7 @@
 						{
 							cols: 205,
 							rows: 40,
-							poster: 'npt:01:30'
+							poster: 'npt:00:18'
 						}
 					);
 				</script>
@@ -227,7 +307,7 @@
 						{
 							cols: 205,
 							rows: 40,
-							poster: 'npt:01:03'
+							poster: 'npt:00:09'
 						},
 					);
 				</script>
@@ -245,7 +325,7 @@
 				</div>
 			</section>
 			<section>
-				<h3 style="color: springgreen; text-transform: capitalize;">Loki - Log based alerting - Checking If Rules Created</h3>
+				<h3 style="color: springgreen; text-transform: capitalize;">Checking If Rules Created</h3>
 				<div id="loki-log-alert-rules-demo"></div>
 				<script src="assets/asciinema-player.min.js"></script>
 				<script>
@@ -254,15 +334,15 @@
 						document.getElementById('loki-log-alert-rules-demo'),
 						{
 							cols: 205,
-							rows: 40,
-							poster: 'npt:01:03'
+							rows: 55,
+							poster: 'npt:00:37'
 						},
 					);
 				</script>
 			</section>
 			<section data-background-color="aquamarine">
-				<h4 >🥷🏿Thanks!!</h4>
-				<h4 >Any Questions?</h4>
+				<h4>🥷🏿Thanks!!</h4>
+				<h4>Any Questions?</h4>
 			</section>
 		</div>
 	</div>
