@@ -21,198 +21,106 @@
 		<div class="slides">
 			<section>
 				<h1 style="color: springgreen;">Demo Day</h1>
-				<h3 style="color: chocolate;">Sprint 36</h3>
-				<h3 style="color: chocolate;">21 Aug 2023</h3>
+				<h3 style="color: chocolate;">Sprint 37</h3>
+				<h3 style="color: chocolate;">04 Sep 2023</h3>
 			</section>
 			<section>
 				<h3 style="color: springgreen; text-transform: capitalize;">Tasks</h3>
 				<img class="r-stretch" src="assets/tasks.png">
 			</section>
 			<section>
-				<h3 style="color: springgreen; text-transform: capitalize;">Wireguard Operator as Config Module</h3>
+				<h4 style="color: springgreen; text-transform: capitalize;">[Aster CR] Ability to access facets deployed cloud
+					managed DBs from local dev machine</h4>
 				<section>
 					<pre>
-								<p>module.json</p>
-								<code data-trim data-noescape data-line-numbers="1,2,3,5,6,8,11" style="overflow: hidden;">
-									{
-										"provides": "wireguard_operator",
-										"supported_clouds": ["aws", "gcp", "azure"],
-										"inputs": {},
-										"lifecycle": "ENVIRONMENT",
-										"version": "0.1",
-										"depends_on": [],
-										"input_type": "config",
-										"composition": {},
-										"conditional_on_intent": ""
-									}											
+								<p>generate_svc.py</p>
+								<code data-trim data-noescape >
+									import json
+
+									def generate_yaml(name, ip):
+											yaml_template = f'''
+											---
+											apiVersion: v1
+											kind: Service
+											metadata:
+												name: {name}
+												namespace: default
+											spec:
+												type: ClusterIP
+												ports:
+												- port: 3306
+													targetPort: 3306
+
+											---
+											apiVersion: v1
+											kind: Endpoints
+											metadata:
+												name: {name}
+												namespace: default
+											subsets:
+											- addresses:
+												- ip: {ip}
+												ports:
+												- port: 3306
+											'''
+											return yaml_template
+
+									def main():
+											input_file = 'input.json'
+											
+											with open(input_file, 'r') as json_file:
+													data = json.load(json_file)
+											
+											for env, services in data.items():
+													output_file = f'{env}_output.yaml'
+													with open(output_file, 'w') as yaml_file:
+															for name, ip in services.items():
+																	yaml_content = generate_yaml(name, ip)
+																	yaml_file.write(yaml_content)
+													print(f"Generated YAML content for '{env}' and saved to '{output_file}'")
+
+									if __name__ == "__main__":
+											main()
+											
 								</code>
 							</pre>
 				</section>
 				<section>
 					<pre>
-						<p>configuration/instances/sample.json</p>
-						<code data-trim data-noescape data-line-numbers="2|4|6|11-14|15-24" style="overflow: hidden;">
-							{
-								"kind": "wireguard_operator",
-								"flavor": "default",
-								"version": "0.1",
-								"lifecycle": "ENVIRONMENT",
-								"disabled": false,
-								"depends_on": [],
-								"metadata": {
-									"name": ""
-								},
-								"spec": {
-									"cpu": "100m",
-									"memory": "300Mi"
-								},
-								"advanced": {
-									"wireguard_operator": {
-										// helm chart attributes here
-										"version": "0.1.0",
-										"wait": true,
-										"values": {
-											// helm chart values here
-										}
-									}
-								},
-								"out": {}
-							}
-						</code>
-					</pre>
-				</section>
-				<section>
-					<pre>
-						<p><b>To Create VPN Server</b></p>
-						<p>test-vpn.yaml</p>
-						<code data-trim data-noescape style="overflow: hidden;">
-							apiVersion: vpn.example.com/v1alpha1
-							kind: Wireguard
+						<p>Generated svc and endpoint yaml - generated_svc.yml</p>
+						<code data-trim data-noescape data-line-numbers="2,3|5|10,11|14,16|19-22" style="overflow: hidden;">
+							---
+							apiVersion: v1
+							kind: Service
 							metadata:
-								name: "facets-vpn"
-						</code>
-						<p><b>To Create User</b></p>
-						<p>test-user.yaml</p>
-						<code data-trim data-noescape style="overflow: hidden;">
-							apiVersion: vpn.example.com/v1alpha1
-							kind: WireguardPeer
-							metadata:
-								name: test-user
+								name: azure-erx-mysql
+								namespace: default
 							spec:
-								wireguardRef: "facets-vpn"
+								type: ClusterIP
+								ports:
+								- port: 3306
+									targetPort: 3306
+							---
+							apiVersion: v1
+							kind: Endpoints
+							metadata:
+								name: azure-erx-mysql
+								namespace: default
+							subsets:
+							- addresses:
+								- ip:  10.244.8.12
+								ports:
+								- port: 3306
 						</code>
 					</pre>
 				</section>
-			</section>
-			<section>
-				<h3 style="color: springgreen; text-transform: capitalize;">Wireguard Operator - Terraform Test</h3>
-				<div id="wireguard-operator-tf-demo"></div>
-				<script src="assets/asciinema-player.min.js"></script>
-				<script>
-					AsciinemaPlayer.create(
-						'assets/task1/wireguard-operator-tf-demo.cast',
-						document.getElementById('wireguard-operator-tf-demo'),
-						{
-							cols: 205,
-							rows: 40,
-							poster: 'npt:01:30'
-						}
-					);
-				</script>
-			</section>
-			<section>
-				<h3 style="color: springgreen; text-transform: capitalize;">Wireguard Operator - TerraTest</h3>
-				<div id="wireguard-operator-terratest-demo"></div>
-				<script src="assets/asciinema-player.min.js"></script>
-				<script>
-					AsciinemaPlayer.create(
-						'assets/task1/wireguard-operator-terratest-demo.cast',
-						document.getElementById('wireguard-operator-terratest-demo'),
-						{
-							cols: 205,
-							rows: 40,
-							poster: 'npt:01:03'
-						},
-					);
-				</script>
-			</section>
-			<section>
-				<h3 style="color: springgreen; text-transform: capitalize;">Wireguard Operator - Test in Facets CP</h3>
-				<div class="r-stack">
-					<img class="fragment fade-out" src="assets/task1/1.png">
-					<img class="fragment current-visible" src="assets/task1/2.png">
-					<img class="fragment current-visible" src="assets/task1/3.png">
-					<img class="fragment current-visible" src="assets/task1/4.png">
-					<img class="fragment current-visible" src="assets/task1/5.png">
-					<img class="fragment current-visible" src="assets/task1/6.png">
-					<img class="fragment current-visible" src="assets/task1/7.png">
-					<img class="fragment" src="assets/task1/8.png">
-				</div>
 			</section>
 			<section>
 				<h3 style="color: springgreen; text-transform: capitalize;">Loki - Log based alerting</h3>
 				<section>
 					<pre>
-						<p><b>The Problem?</b></p>
-						<p>loki-log-alert.yaml</p>
-						<code data-trim data-noescape>
-						groups:
-							- name: Test
-								rules:
-								- alert: ExceptionWhileVerifyingOTP
-									expr: sum(rate({app=~\".+\", app!~\".*loki.*\"} |= \"Exception caught while verifying OTP\" [1m])) by (job) > 0
-									for: 5m
-									labels:
-										severity: critical
-									annotations:
-										summary: Exception caught while verifying OTP from Service `{{ $labels.app }}`
-										description: Exception caught while verifying OTP from Service `{{ $labels.app }}`
-								- alert: DeadlineExceeded
-									expr: sum(rate({app=~\".+\", app!~\".*loki.*\"} |= \"DEADLINE_EXCEEDED\" [1m])) by (job) > 0
-									for: 5m
-									labels:
-										severity: critical
-									annotations:
-										summary: DEADLINE_EXCEEDED error from Service `{{ $labels.app }}`
-										description: DEADLINE_EXCEEDED error from Service `{{ $labels.app }}`
-					</code>
-				</pre>
-			</section>
-				<section>
-					<pre>
-						<p><b>The Problem?</b></p>
-						<p>log_collector/instances/loki.json</p>
-						<code data-trim data-noescape data-line-numbers="7">
-							"ruler": {
-								"enabled": true,
-								"kind": "Deployment",
-								"replicas": 1,
-								"directories": {
-									"tenant_mplpro": {
-										"rules.txt": "groups:\n  - name: Test\n    rules:\n    - alert: ExceptionWhileVerifyingOTP\n      expr: sum(rate({app=~\".+\", app!~\".*loki.*\"} |= \"Exception caught while verifying OTP\" [1m])) by (job) > 0\n      for: 5m\n      labels:\n        severity: critical\n      annotations:\n        summary: Exception caught while verifying OTP from Service `{{ $labels.app }}`\n        description: Exception caught while verifying OTP from Service `{{ $labels.app }}`\n    - alert: DeadlineExceeded\n      expr: sum(rate({app=~\".+\", app!~\".*loki.*\"} |= \"DEADLINE_EXCEEDED\" [1m])) by (job) > 0\n      for: 5m\n      labels:\n        severity: critical\n      annotations:\n        summary: DEADLINE_EXCEEDED error from Service `{{ $labels.app }}`\n        description: DEADLINE_EXCEEDED error from Service `{{ $labels.app }}`"
-									}
-								},
-								"extraEnv": [
-									{
-										"name": "MY_POD_IP",
-										"valueFrom": {
-											"fieldRef": {
-												"fieldPath": "status.podIP"
-											}
-										}
-									}
-								],
-								"extraArgs": [
-									"-memberlist.bind-addr=$(MY_POD_IP)"
-								]
-							}
-						</code>
-					</pre>
-				</section>
-				<section>
-					<pre>
-								<p>module.json</p>
-								<code data-trim data-noescape data-line-numbers="2,3,7,9" style="overflow: hidden;">
+								<p>previously <mark>module.json</mark> looks like this</p>
+								<code data-trim data-noescape data-line-numbers="2,3" style="overflow: hidden;">
 									{
 										"provides": "alert_group",
 										"flavors": ["loki"],
@@ -230,115 +138,50 @@
 				</section>
 				<section>
 					<pre>
-						<p>alert_group/instances/sample.json</p>
-						<code data-trim data-noescape data-line-numbers="2|3|4|6|12-13|14-26|27-39">
-							{
-								"kind": "alert_group",
-								"flavor": "loki",
-								"version": "0.1",
-								"lifecycle": "ENVIRONMENT",
-								"disabled": false,
-								"provided": false,
-								"depends_on": [],
-								"metadata": {
-									"name": ""
-								},
-								"spec": {
-									"rules": {
-										"HighPercentageError": {
-											"expr": "sum(rate({app=\"foo\", env=\"production\"} |= \"error\" [5m])) by (job) / sum(rate({app=\"foo\", env=\"production\"}[5m])) by (job) > 0.05",
-											"message": "High request latency",
-											"summary": "High request latency for {{ $labels.app }}",
-											"for": "2m",
-											"labels": {
-												"team": "infra",
-												"severity": "critical"
-											},
-											"disabled": false,
-											"resource_name": "{{ $labels.app}}",
-											"resource_type": "app"
-										},
-										"TestAlert": {
-											"expr": "sum(rate({app=\"loki\"} | logfmt | level=\"info\"[1m])) by (container) > 0",
-											"for": "1m",
-											"labels": {
-												"team": "infra",
-												"severity": "warning"
-											},
-											"summary": "Loki info warning per minute rate > 0",
-											"message": "Loki warning per minute rate > 0 container: {{ $labels.container }}",
-											"resource_name": "{{ $labels.app}}",
-											"resource_type": "app",
-											"disabled": false
-										}
+								<p>Now kind and flavor is updated to match how Loki calls it</p>
+								<code data-trim data-noescape data-line-numbers="2,3-5" style="overflow: hidden;">
+									{
+										"provides": "loki_alerting_rules",
+										"flavors": [
+											"default"
+										],
+										"supported_clouds": [
+											"any"
+										],
+										"inputs": {},
+										"lifecycle": "ENVIRONMENT",
+										"version": "0.1",
+										"depends_on": [],
+										"input_type": "instance",
+										"composition": {},
+										"conditional_on_intent": ""
 									}
-								},
-								"advanced": {},
-								"out": {}
-							}
-						</code>
-					</pre>
+								</code>
+							</pre>
 				</section>
 			</section>
 			<section>
-				<h3 style="color: springgreen; text-transform: capitalize;">Loki - Log based alerting - Terraform Test</h3>
-				<div id="loki-log-alert-tf-demo"></div>
-				<script src="assets/asciinema-player.min.js"></script>
-				<script>
-					AsciinemaPlayer.create(
-						'assets/task2/terraform_test.cast',
-						document.getElementById('loki-log-alert-tf-demo'),
-						{
-							cols: 205,
-							rows: 40,
-							poster: 'npt:00:18'
-						}
-					);
-				</script>
+				<h3 style="color: springgreen; text-transform: capitalize;">Ingress outputs as interfaces</h3>
+				<video data-autoplay src="assets/ingress_intefaces_output.mov"></video>
 			</section>
 			<section>
-				<h3 style="color: springgreen; text-transform: capitalize;">Loki - Log based alerting - TerraTest</h3>
-				<div id="loki-log-alert-terratest-demo"></div>
-				<script src="assets/asciinema-player.min.js"></script>
-				<script>
-					AsciinemaPlayer.create(
-						'assets/task2/terratest_test.cast',
-						document.getElementById('loki-log-alert-terratest-demo'),
-						{
-							cols: 205,
-							rows: 40,
-							poster: 'npt:00:09'
-						},
-					);
-				</script>
-			</section>
-			<section>
-				<h3 style="color: springgreen; text-transform: capitalize;">Loki - Log based alerting - Test in Facets CP</h3>
-				<div class="r-stack">
-					<img class="fragment fade-out" src="assets/task2/rc_enabled_loki_alerts.png">
-					<img class="fragment current-visible" src="assets/task2/rc_alert_group_loki1.png">
-					<img class="fragment current-visible" src="assets/task2/rc_alert_group_loki2.png">
-					<img class="fragment current-visible" src="assets/task2/rc_loki01_intent.png">
-					<img class="fragment current-visible" src="assets/task2/apply_release_tf_plan.png">
-					<img class="fragment current-visible" src="assets/task2/apply_release_tf_cm_apply.png">
-					<img class="fragment current-visible" src="assets/task2/apply_release_tf_loki_apply.png">
-				</div>
-			</section>
-			<section>
-				<h3 style="color: springgreen; text-transform: capitalize;">Checking If Rules Created</h3>
-				<div id="loki-log-alert-rules-demo"></div>
-				<script src="assets/asciinema-player.min.js"></script>
-				<script>
-					AsciinemaPlayer.create(
-						'assets/task2/verifying-cm-mounted.cast',
-						document.getElementById('loki-log-alert-rules-demo'),
-						{
-							cols: 205,
-							rows: 55,
-							poster: 'npt:00:37'
-						},
-					);
-				</script>
+				<h4 style="color: springgreen; text-transform: capitalize;">[Capillary CR] Alpha ingress rules are picked by non alpha ingress controllers</h4>
+				<section>
+					<pre>
+						<p>Below arg was missing in legacy deployment nginx container</p>
+						<code data-trim data-noescape >
+							{{- if (semverCompare ">=0.9.0-beta.1" .Values.controller.image.tag) }}
+								- --controller-class=k8s.io/{{ .Release.Name }}-ingress-nginx
+							{{- end }}
+						</code>
+					</pre>
+				</section>
+				<section>
+					<img src="assets/alpha_ingress_rules_applied_to_legacy.png">
+				</section>
+				<section>
+					<img src="assets/alpha_ingress_rules_not_applied_to_legacy.png">
+				</section>
 			</section>
 			<section data-background-color="aquamarine">
 				<h4>🥷🏿Thanks!!</h4>
